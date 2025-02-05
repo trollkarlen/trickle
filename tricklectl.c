@@ -22,9 +22,9 @@
 #ifdef HAVE_ERR_H
 #include <err.h>
 #endif /* HAVE_ERR_H */
-#include <unistd.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */
@@ -50,79 +50,68 @@ void handle_command(int, int, char **);
 #define COMMAND_LAST 1
 
 static char *commands[] = {
-	[COMMAND_GETRATES] = "getrates",
-	[COMMAND_LAST]     = NULL
-};
+    [COMMAND_GETRATES] = "getrates", [COMMAND_LAST] = NULL};
 
-int
-main(int argc, char **argv)
-{
-	char *sockname = TRICKLED_SOCKNAME;
-	int opt, i;
+int main(int argc, char **argv) {
+  char *sockname = TRICKLED_SOCKNAME;
+  int opt, i;
 
-	while ((opt = getopt(argc, argv, "hs:")) != -1)
-                switch (opt) {
-		case 's':
-			sockname = optarg;
-			break;
-		case 'h':
-		default:
-			usage();
-		}
+  while ((opt = getopt(argc, argv, "hs:")) != -1)
+    switch (opt) {
+    case 's':
+      sockname = optarg;
+      break;
+    case 'h':
+    default:
+      usage();
+    }
 
-	argc -= optind;
-	argv += optind;
+  argc -= optind;
+  argv += optind;
 
-	if (argc == 0)
-		usage();
+  if (argc == 0)
+    usage();
 
-	for (i = 0; commands[i] != NULL; i++)
-		if (strlen(commands[i]) == strlen(argv[0]) &&
-		    strcmp(commands[i], argv[0]) == 0)
-			break;
+  for (i = 0; commands[i] != NULL; i++)
+    if (strlen(commands[i]) == strlen(argv[0]) &&
+        strcmp(commands[i], argv[0]) == 0)
+      break;
 
-	if (i == COMMAND_LAST)
-		usage();
+  if (i == COMMAND_LAST)
+    usage();
 
-	argc -= 1;
-	argv += 1;
+  argc -= 1;
+  argv += 1;
 
-	trickled_configure(sockname, &socket, &read, &write, &close, argv[0]);
-	trickled_ctl_open(&trickled_sock);
+  trickled_configure(sockname, &socket, &read, &write, &close, argv[0]);
+  trickled_ctl_open(&trickled_sock);
 
-	if (!trickled_sock)
-		err(1, "%s", sockname);
+  if (!trickled_sock)
+    err(1, "%s", sockname);
 
-	handle_command(i, argc, argv);
+  handle_command(i, argc, argv);
 
-	return (0);
+  return (0);
 }
 
-void
-handle_command(int cmd, int ac, char **av)
-{
-	switch (cmd) {
-	case COMMAND_GETRATES: {
-		uint32_t uplim, uprate, downlim, downrate;
-		if (trickled_getinfo(&uplim, &uprate, &downlim, &downrate) == -1)
-			err(1, "trickled_getinfo()");
-		/* XXX testing downlim, too, etc */
-		warnx("DOWNLOAD: %d.%d KB/s (utilization: %.1f%%)",
-		    downrate / 1024, (downrate % 1024) * 100 / 1024,
-		    ((1.0 * downrate) / (1.0 * downlim)) * 100);
-		if (uprate == 0)
-			uprate = 1;
-		warnx("UPLOAD: %d.%d KB/s (utilization: %.1f%%)",
-		    uprate / 1024, (uprate % 1024) * 100 / 1024,
-		    ((1.0 * uprate) / (1.0 * uplim)) * 100);
-	}
-	default:
-		break;
-	}
+void handle_command(int cmd, int ac, char **av) {
+  switch (cmd) {
+  case COMMAND_GETRATES: {
+    uint32_t uplim, uprate, downlim, downrate;
+    if (trickled_getinfo(&uplim, &uprate, &downlim, &downrate) == -1)
+      err(1, "trickled_getinfo()");
+    /* XXX testing downlim, too, etc */
+    warnx("DOWNLOAD: %d.%d KB/s (utilization: %.1f%%)", downrate / 1024,
+          (downrate % 1024) * 100 / 1024,
+          ((1.0 * downrate) / (1.0 * downlim)) * 100);
+    if (uprate == 0)
+      uprate = 1;
+    warnx("UPLOAD: %d.%d KB/s (utilization: %.1f%%)", uprate / 1024,
+          (uprate % 1024) * 100 / 1024, ((1.0 * uprate) / (1.0 * uplim)) * 100);
+  }
+  default:
+    break;
+  }
 }
 
-void
-usage(void)
-{
-	exit(1);
-}
+void usage(void) { exit(1); }

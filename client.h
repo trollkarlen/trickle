@@ -11,50 +11,52 @@
 #define TRICKLE_CLIENT_H
 
 #define CLIENT_CONFIGURED 0x01
-#define CLIENT_ONQUEUE    0x02
-#define CLIENT_SPECTATOR  0x04
+#define CLIENT_ONQUEUE 0x02
+#define CLIENT_SPECTATOR 0x04
+
+#include "message.h"
 
 struct client {
-	SPLAY_ENTRY(client)  next;
-	int                  s;
-	struct event         ev;
-	int                  flags;
+  SPLAY_ENTRY(client) next;
+  int s;
+  struct event ev;
+  int flags;
 
-	pid_t                pid;
-	char                 argv0[256];
-	uid_t                uid;
-	char                 uname[256];
-	gid_t                gid;
-	char                 gname[256];
+  pid_t pid;
+  char argv0[256];
+  uid_t uid;
+  char uname[256];
+  gid_t gid;
+  char gname[256];
 
-	struct timeval       starttv;
+  struct timeval starttv;
 
-	uint                 lim[2];
-	uint                 pri;
-	struct bwstat       *stat;
-	uint                 lsmooth;
-	double               tsmooth;
+  uint lim[2];
+  uint pri;
+  struct bwstat *stat;
+  uint lsmooth;
+  double tsmooth;
 
-	struct timeval       delaytv;
-	struct event         delayev;
-	int                  delaylen;
-	short                delaywhich;
+  struct timeval delaytv;
+  struct event delayev;
+  int delaylen;
+  short delaywhich;
 
-	TAILQ_ENTRY(client)  nextq;
-	TAILQ_ENTRY(client)  nextp;
+  TAILQ_ENTRY(client) nextq;
+  TAILQ_ENTRY(client) nextp;
 };
 
-void            client_init(uint);
-int             client_register(struct client *);
-int             client_configure(struct client *);
-void            client_unregister(struct client *);
-void            client_delay(struct client *, short, size_t, uint);
-void            client_getdelay(struct client *, short, size_t, uint);
-void            client_update(struct client *, short, size_t);
-int             client_sendmsg(struct client *, struct msg *);
-int             client_recvmsg(struct client *, struct msg *);
-void            client_printrates(void);
-void            client_getinfo(struct client *, uint, uint);
-void            client_force(void);
+void client_init(uint);
+int client_register(struct client *);
+int client_configure(struct client *);
+void client_unregister(struct client *);
+void client_delay(struct client *, short, size_t, uint);
+void client_getdelay(struct client *, short, size_t, uint);
+void client_update(struct client *, short, size_t);
+int client_sendmsg(struct client *, struct msg *);
+int client_recvmsg(struct client *, struct msg *);
+void client_printrates(void);
+void client_getinfo(struct client *, uint, uint);
+void client_force(void);
 
 #endif /* TRICKLE_CLIENT_H */

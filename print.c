@@ -26,12 +26,12 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <syslog.h>
-#include <string.h>
 #include <errno.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
 
 static void vprint(const char *, va_list);
 static void vprintx(const char *, va_list);
@@ -40,108 +40,94 @@ static int verbose, use_syslog;
 
 extern char *__progname;
 
-void
-print_setup(int _verbose, int _use_syslog)
-{
-	verbose = _verbose;
-	use_syslog = _use_syslog;
+void print_setup(int _verbose, int _use_syslog) {
+  verbose = _verbose;
+  use_syslog = _use_syslog;
 
-	if (use_syslog)
-		openlog(__progname, LOG_PID, LOG_DAEMON);
+  if (use_syslog)
+    openlog(__progname, LOG_PID, LOG_DAEMON);
 }
 
 /*
  * These are adopted from the OpenBSD err*() and warn*() functions.
  */
 
-void
-errv(int level, int eval, const char *fmt, ...)
-{
-	va_list ap;
-	
-	if (level > verbose)
-		exit(eval);
+void errv(int level, int eval, const char *fmt, ...) {
+  va_list ap;
 
-	va_start(ap, fmt);
-	vprint(fmt, ap);
-	va_end(ap);
-	exit(eval);
+  if (level > verbose)
+    exit(eval);
+
+  va_start(ap, fmt);
+  vprint(fmt, ap);
+  va_end(ap);
+  exit(eval);
 }
 
-void
-errxv(int level, int eval, const char *fmt, ...)
-{
-	va_list ap;
-	
-	if (level > verbose)
-		exit(eval);
+void errxv(int level, int eval, const char *fmt, ...) {
+  va_list ap;
 
-	va_start(ap, fmt);
-	vprintx(fmt, ap);
-	va_end(ap);
-	exit(eval);
+  if (level > verbose)
+    exit(eval);
+
+  va_start(ap, fmt);
+  vprintx(fmt, ap);
+  va_end(ap);
+  exit(eval);
 }
 
-void
-warnv(int level, const char *fmt, ...)
-{
-	va_list ap;
-	
-	if (level > verbose)
-		return;
+void warnv(int level, const char *fmt, ...) {
+  va_list ap;
 
-	va_start(ap, fmt);
-	vprint(fmt, ap);
-	va_end(ap);
+  if (level > verbose)
+    return;
+
+  va_start(ap, fmt);
+  vprint(fmt, ap);
+  va_end(ap);
 }
 
-void
-warnxv(int level, const char *fmt, ...)
-{
-	va_list ap;
+void warnxv(int level, const char *fmt, ...) {
+  va_list ap;
 
-	if (level > verbose)
-		return;
+  if (level > verbose)
+    return;
 
-	va_start(ap, fmt);
-	vprintx(fmt, ap);
-	va_end(ap);
+  va_start(ap, fmt);
+  vprintx(fmt, ap);
+  va_end(ap);
 }
 
-static void
-vprint(const char *fmt, va_list ap)
-{
-	if (use_syslog) {
-		char msg[1024];
-		if (fmt != NULL) {
-			msg[0] = '\0';
-			vsnprintf(msg, sizeof(msg), fmt, ap);
-			strlcat(msg, ": ", sizeof(msg));
-			strlcat(msg, strerror(errno), sizeof(msg));
-			syslog(LOG_INFO, "%s", msg);
-		}
-		return;
-	}
+static void vprint(const char *fmt, va_list ap) {
+  if (use_syslog) {
+    char msg[1024];
+    if (fmt != NULL) {
+      msg[0] = '\0';
+      vsnprintf(msg, sizeof(msg), fmt, ap);
+      strlcat(msg, ": ", sizeof(msg));
+      strlcat(msg, strerror(errno), sizeof(msg));
+      syslog(LOG_INFO, "%s", msg);
+    }
+    return;
+  }
 
-	fprintf(stderr, "%s: ", __progname);
-        if (fmt != NULL)
-                vfprintf(stderr, fmt, ap);
-        fprintf(stderr, ": %s\n", strerror(errno));
+  fprintf(stderr, "%s: ", __progname);
+  if (fmt != NULL)
+    vfprintf(stderr, fmt, ap);
+  fprintf(stderr, ": %s\n", strerror(errno));
 }
 
-static void
-vprintx(const char *fmt, va_list ap)
-{
-	if (use_syslog) {
-		if (fmt != NULL)
-			vsyslog(LOG_INFO, fmt, ap);
-		return;
-	}
+static void vprintx(const char *fmt, va_list ap) {
+  if (use_syslog) {
+    if (fmt != NULL)
+      vsyslog(LOG_INFO, fmt, ap);
+    return;
+  }
 
-	fprintf(stderr, "%s: ", __progname);
-        if (fmt != NULL)
-                vfprintf(stderr, fmt, ap);
-        fprintf(stderr, "\n");
+  fprintf(stderr, "%s: ", __progname);
+  if (fmt != NULL)
+    vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
 }
 
 /*
@@ -156,25 +142,24 @@ vprintx(const char *fmt, va_list ap)
 /*
  * XXX only do if isatty(); ...
  */
-void
-print_dump(u_char *buf, int len)
-{
-	int i, j, goback;
+void print_dump(u_char *buf, int len) {
+  int i, j, goback;
 
-	printf("%s: ", __progname);
-	
-	for (i = 0; i < len; ++i) {
-		printf("%02x ", buf[i]);
-		if ((goback = i % 16) == 15 || i == len - 1) {
-			for (j = 15 - goback; j >= 0; j--) printf("   ");
-			for (j = i - goback; j <= i; j++)
-				if (buf[j] > 31 && buf[j] < 127)
-					printf("%c", buf[j]);
-				else
-					printf(".");
-			if (i != len - 1)
-				printf("\n%s: ", __progname);
-		} 
-	}
-	printf("\n");
+  printf("%s: ", __progname);
+
+  for (i = 0; i < len; ++i) {
+    printf("%02x ", buf[i]);
+    if ((goback = i % 16) == 15 || i == len - 1) {
+      for (j = 15 - goback; j >= 0; j--)
+        printf("   ");
+      for (j = i - goback; j <= i; j++)
+        if (buf[j] > 31 && buf[j] < 127)
+          printf("%c", buf[j]);
+        else
+          printf(".");
+      if (i != len - 1)
+        printf("\n%s: ", __progname);
+    }
+  }
+  printf("\n");
 }

@@ -10,19 +10,18 @@
 #ifndef TRICKLE_TRICKLEDU_H
 #define TRICKLE_TRICKLEDU_H
 
-void            trickled_configure(char *, int (*)(int, int, int),
-                    ssize_t (*)(int, void *, size_t),
-                    ssize_t (*)(int, const void *, size_t),
-		    int (*)(int), char *);
-void            trickled_open(int *);
-int             trickled_update(short, size_t);
-int             trickled_delay(short, size_t *);
+void trickled_configure(char *, int (*)(int, int, int),
+                        ssize_t (*)(int, void *, size_t),
+                        ssize_t (*)(int, const void *, size_t), int (*)(int),
+                        char *);
+void trickled_open(int *);
+int trickled_update(short, size_t);
+int trickled_delay(short, size_t *);
 struct timeval *trickled_getdelay(short, size_t *);
-int             trickled_sendmsg(struct msg *);
-int             trickled_recvmsg(struct msg *);
-void            trickled_ctl_open(int *);
-int             trickled_getinfo(uint32_t *, uint32_t *,
-                    uint32_t *, uint32_t *);
-void            trickled_close(int *);
+int trickled_sendmsg(struct msg *);
+int trickled_recvmsg(struct msg *);
+void trickled_ctl_open(int *);
+int trickled_getinfo(uint32_t *, uint32_t *, uint32_t *, uint32_t *);
+void trickled_close(int *);
 
 #endif /* TRICKLE_TRICKLEDU_H */

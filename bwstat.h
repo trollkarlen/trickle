@@ -14,28 +14,28 @@
 #define BWSTAT_RECV 1
 
 struct bwstat_data {
-	uint32_t            bytes;
-	uint32_t            rate;
-	struct timeval      tv;
+  uint32_t bytes;
+  uint32_t rate;
+  struct timeval tv;
 
-	uint32_t            winbytes;
-	uint32_t            winrate;
-	struct timeval      wintv;
+  uint32_t winbytes;
+  uint32_t winrate;
+  struct timeval wintv;
 };
 
 struct bwstat {
-	struct bwstat_data  data[2];
-	uint                pts;
-	uint                lsmooth;
-	double              tsmooth;
-	TAILQ_ENTRY(bwstat) next, qnext;
+  struct bwstat_data data[2];
+  uint pts;
+  uint lsmooth;
+  double tsmooth;
+  TAILQ_ENTRY(bwstat) next, qnext;
 };
 
-int             bwstat_init(uint);
-struct bwstat  *bwstat_new(void);
-struct bwstat  *bwstat_free(struct bwstat *);
-void            bwstat_update(struct bwstat *, size_t, short);
+int bwstat_init(uint);
+struct bwstat *bwstat_new(void);
+struct bwstat *bwstat_free(struct bwstat *);
+void bwstat_update(struct bwstat *, size_t, short);
 struct timeval *bwstat_getdelay(struct bwstat *, size_t *, uint, short);
-struct bwstat  *bwstat_gettot(void);
+struct bwstat *bwstat_gettot(void);
 
 #endif /* TRICKLE_BWSTAT */

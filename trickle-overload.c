@@ -86,7 +86,7 @@ struct delay {
 	short               pollevents;
 	int                 pollidx;
 
-	TAILQ_ENTRY(delay)  next;	
+	TAILQ_ENTRY(delay)  next;
 };
 
 TAILQ_HEAD(delayhead, delay);
@@ -110,7 +110,11 @@ static uint lsmooth/* , latency */;
 static int trickled, initialized, initializing;
 /* XXX initializing - volatile? */
 
+#define UNUSED(x) (void)(x)
+
 #define DECLARE(name, ret, args) static ret (*libc_##name) args
+
+// UNUSED(libc_##name);
 
 DECLARE(socket, int, (int, int, int));
 DECLARE(close, int, (int));
@@ -371,8 +375,8 @@ socket(int domain, int type, int protocol)
 	type &= ~SOCK_CLOEXEC;
 #endif
 
-	if (sock != -1 
-		&& (domain == AF_INET || domain == AF_INET6) 
+	if (sock != -1
+		&& (domain == AF_INET || domain == AF_INET6)
 		&& type & SOCK_STREAM) {
 		if ((sd = calloc(1, sizeof(*sd))) == NULL)
 			return (-1);
@@ -486,7 +490,7 @@ select_shift(struct delayhead *dhead, struct timeval *difftv,
 
 	if (d != NULL)
 		timersub(&d->delaytv, difftv, *delaytv);
-	else 
+	else
 		*delaytv = NULL;
 
 	/* XXX this should be impossible ... */
@@ -521,7 +525,7 @@ select(int nfds, fd_set *rfds, fd_set *wfds, fd_set *efds,
 	if (__timeout != NULL) {
 		_timeout = *__timeout;
 		timeout = &_timeout;
-	} 
+	}
 
 	TRICKLE_LOCK;
 	INIT;
@@ -532,7 +536,7 @@ select(int nfds, fd_set *rfds, fd_set *wfds, fd_set *efds,
 	 */
 	for (which = 0; which < 2; which++)
 		TAILQ_FOREACH(sd, &sdhead, next)
-			if ((fds = fdsets[which]) != NULL && 
+			if ((fds = fdsets[which]) != NULL &&
 			    FD_ISSET(sd->sock, fds) &&
 			    select_delay(&dhead, sd, which)) {
 				FD_CLR(sd->sock, fds);
@@ -645,14 +649,14 @@ poll(struct pollfd *fds, int nfds, int __timeout)
 			continue;
 
 		/* For each event */
-		if (pfd->events & POLL_RDMASK && 
+		if (pfd->events & POLL_RDMASK &&
 		    (d = select_delay(&dhead, sd, TRICKLE_RECV)) != NULL) {
 			d->pollevents = pfd->events & POLL_RDMASK;
 			d->pollidx = i;
 			pfd->events &= ~POLL_RDMASK;
 		}
 
-		if (pfd->events & POLL_WRMASK && 
+		if (pfd->events & POLL_WRMASK &&
 		    (d = select_delay(&dhead, sd, TRICKLE_SEND)) != NULL) {
 			d->pollevents = pfd->events & POLL_WRMASK;
 			d->pollidx = i;
@@ -723,7 +727,7 @@ ssize_t
 read(int fd, void *buf, size_t nbytes)
 {
 	ssize_t ret = -1;
-	size_t xnbytes = nbytes;
+	ssize_t xnbytes = nbytes;
 	int eagain;
 	LOCK_VAR;
 
@@ -758,7 +762,7 @@ read(int fd, void *buf, size_t nbytes)
 ssize_t
 readv(int fd, const struct iovec *iov, int iovcnt)
 {
-	size_t len = 0;
+	ssize_t len = 0;
 	ssize_t ret = -1;
 	int i, eagain;
 	LOCK_VAR;
@@ -791,89 +795,89 @@ readv(int fd, const struct iovec *iov, int iovcnt)
 	return (ret);
 }
 
-#ifndef __FreeBSD__ 
+#ifndef __FreeBSD__
 ssize_t
 recv(int sock, void *buf, size_t len, int flags)
 {
-	ssize_t ret = -1;
-	size_t xlen = len;
-	int eagain;
-	LOCK_VAR;
+    ssize_t ret = -1;
+    ssize_t xlen = len;
+    int eagain;
+    LOCK_VAR;
 
-	TRICKLE_LOCK;
-	INIT;
+    TRICKLE_LOCK;
+    INIT;
 
-	if (!(eagain = delay(sock, &xlen, TRICKLE_RECV) == TRICKLE_WOULDBLOCK)) {
-		TRICKLE_UNLOCK;
-		ret = (*libc_recv)(sock, buf, xlen, flags);
-		TRICKLE_LOCK;
+    if (!(eagain = delay(sock, &xlen, TRICKLE_RECV) == TRICKLE_WOULDBLOCK)) {
+        TRICKLE_UNLOCK;
+        ret = (*libc_recv)(sock, buf, xlen, flags);
+        TRICKLE_LOCK;
 #ifdef DEBUG
-		safe_printv(0, "[DEBUG] recv(%d, *, %d, %d) = %d",
-		    sock, len, flags, ret);
-	} else {
-		safe_printv(0, "[DEBUG] delaying recv(%d, *, %d, %d)", sock, len, flags);		
+        safe_printv(0, "[DEBUG] recv(%d, *, %d, %d) = %d",
+                sock, len, flags, ret);
+    } else {
+        safe_printv(0, "[DEBUG] delaying recv(%d, *, %d, %d)", sock, len, flags);
 #endif /* DEBUG */
-	}
+    }
 
-	update(sock, ret, TRICKLE_RECV);
-	TRICKLE_UNLOCK;
+    update(sock, ret, TRICKLE_RECV);
+    TRICKLE_UNLOCK;
 
-	if (eagain) {
-		errno = EAGAIN;
-		ret = -1;
-	}
+    if (eagain) {
+        errno = EAGAIN;
+        ret = -1;
+    }
 
-	return (ret);
+    return (ret);
 }
 #endif /* !__FreeBSD__ */
 
 #ifdef __sun__
 ssize_t
 recvfrom(int sock, void *buf, size_t len, int flags, struct sockaddr *from,
-    Psocklen_t fromlen)
+        Psocklen_t fromlen)
 #else
 ssize_t
 recvfrom(int sock, void *buf, size_t len, int flags, struct sockaddr *from,
-    socklen_t *fromlen)
+        socklen_t *fromlen)
 #endif /* __sun__ */
 {
-	ssize_t ret = -1;
-	size_t xlen = len;
-	int eagain;
-	LOCK_VAR;
+    ssize_t ret = -1;
+    ssize_t xlen = len;
+    int eagain;
+    LOCK_VAR;
 
-	TRICKLE_LOCK;
-	INIT;
+    TRICKLE_LOCK;
+    INIT;
 
-	if (!(eagain = delay(sock, &xlen, TRICKLE_RECV) == TRICKLE_WOULDBLOCK)) {
-		TRICKLE_UNLOCK;
-		ret = (*libc_recvfrom)(sock, buf, xlen, flags, from, fromlen);
-		TRICKLE_LOCK;
+    if (!(eagain = delay(sock, &xlen, TRICKLE_RECV) == TRICKLE_WOULDBLOCK)) {
+        TRICKLE_UNLOCK;
+        ret = (*libc_recvfrom)(sock, buf, xlen, flags, from, fromlen);
+        TRICKLE_LOCK;
 #ifdef DEBUG
-		safe_printv(0, "[DEBUG] recvfrom(%d, *, %d, %d) = %d",
-		    sock, len, flags, ret);
-	} else {
-		safe_printv(0, "[DEBUG] delaying recvfrom(%d, *, %d, %d)", sock,
-		    len, flags);		
+        safe_printv(0, "[DEBUG] recvfrom(%d, *, %d, %d) = %d",
+                sock, len, flags, ret);
+    } else {
+        safe_printv(0, "[DEBUG] delaying recvfrom(%d, *, %d, %d)", sock,
+                len, flags);
 #endif /* DEBUG */
-	}
+    }
 
-	update(sock, ret, TRICKLE_RECV);
-	TRICKLE_UNLOCK;
+    update(sock, ret, TRICKLE_RECV);
+    TRICKLE_UNLOCK;
 
-	if (eagain) {
-		errno = EAGAIN;
-		ret = -1;
-	}
+    if (eagain) {
+        errno = EAGAIN;
+        ret = -1;
+    }
 
-	return (ret);
+    return (ret);
 }
 
 ssize_t
 write(int fd, const void *buf, size_t len)
 {
 	ssize_t ret = -1;
-	size_t xlen = len;
+	ssize_t xlen = len;
 	int eagain;
 	LOCK_VAR;
 
@@ -909,7 +913,7 @@ ssize_t
 writev(int fd, const struct iovec *iov, int iovcnt)
 {
 	ssize_t ret = -1;
-	size_t len = 0;
+	ssize_t len = 0;
 	int i, eagain;
 	LOCK_VAR;
 
@@ -947,7 +951,7 @@ ssize_t
 send(int sock, const void *buf, size_t len, int flags)
 {
 	ssize_t ret = -1;
-	size_t xlen = len;
+	ssize_t xlen = len;
 	int eagain;
 	LOCK_VAR;
 
@@ -984,7 +988,7 @@ sendto(int sock, const void *buf, size_t len, int flags, const struct sockaddr *
     socklen_t tolen)
 {
 	ssize_t ret = -1;
-	size_t xlen = len;
+	ssize_t xlen = len;
 	int eagain;
 	LOCK_VAR;
 
@@ -1144,7 +1148,7 @@ accept(int sock, struct sockaddr *addr, socklen_t *addrlen)
 ssize_t
 sendfile(int out_fd, int in_fd, off_t *offset, size_t count)
 {
-	size_t inbytes = count, outbytes = count, bytes;
+	ssize_t inbytes = count, outbytes = count, bytes;
 	ssize_t ret = 0;
 	LOCK_VAR;
 
@@ -1215,13 +1219,13 @@ getdelay(struct sockdesc *sd, ssize_t *len, short which)
 	if (*len < 0)
 		*len = sd->data[which].lastlen;
 
-	if (trickled && (xtv = trickled_getdelay(which, len)) != NULL)
+	if (trickled && (xtv = trickled_getdelay(which, (size_t*)len)) != NULL)
 		xlim = *len / (xtv->tv_sec + xtv->tv_usec / 1000000.0);
 
 	if (xlim == 0)
 		return (NULL);
 
-	return (bwstat_getdelay(sd->stat, len, xlim, which));
+	return (bwstat_getdelay(sd->stat, (size_t*)len, xlim, which));
 }
 
 static void

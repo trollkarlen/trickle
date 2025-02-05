@@ -139,7 +139,7 @@ main(int argc, char **argv)
 	setenv("TRICKLE_SOCKNAME", sockname, 1);
 	setenv("TRICKLE_TSMOOTH", tsmooth, 1);
 	setenv("TRICKLE_LSMOOTH", lsmooth, 1);
-/*	setenv("TRICKLE_LATENCY", latency, 1); */
+    setenv("TRICKLE_LATENCY", latency, 1);
 
 	setenv("LD_PRELOAD", path, 1);
 

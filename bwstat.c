@@ -144,13 +144,13 @@ _bwstat_update(struct bwstat_data *bsd, size_t len)
 struct timeval *
 bwstat_getdelay(struct bwstat *bs, size_t *len, uint lim, short which)
 {
-	uint rate = 0, npts = 0, ent;
+	uint rate = 0, npts = 0, ent = 0;
 	int ncli = 0, pool = 0, xent;
 	double delay;
 	static struct timeval tv;
 	struct bwstathead poolq;
 	struct bwstat *xbs, *bstot = TAILQ_FIRST(&statq);
-	uint initent;
+	// uint initent;
 	size_t xlen = *len;
 
 	if (*len == 0)
@@ -175,8 +175,8 @@ bwstat_getdelay(struct bwstat *bs, size_t *len, uint lim, short which)
 	if (ncli == 0)
 		return (NULL);
 
-	/* Entitlement per point */
-	initent = ent = lim / npts;
+    /* Entitlement per point */
+    ent = lim / npts;
 
 	if (ent == 0)
 		;		/*

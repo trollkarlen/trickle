@@ -103,7 +103,7 @@ xdr_msg(XDR *xdrs, struct msg *msg)
 {
 	X(xdr_short(xdrs, &msg->status));
 	X(xdr_union(xdrs, (int *)&msg->type, (char *)&msg->data,
-	      xdr_msg_discrim, (xdrproc_t)_xdr_void));
+                xdr_msg_discrim, (xdrproc_t)_xdr_void));
 
 	return (TRUE);
 }
@@ -113,7 +113,7 @@ msg2xdr(struct msg *msg, u_char *buf, uint32_t *buflen)
 {
 	XDR xdrs;
 
-	xdrmem_create(&xdrs, buf, *buflen, XDR_ENCODE);
+	xdrmem_create(&xdrs, (char*)buf, *buflen, XDR_ENCODE);
 
 	if (!xdr_msg(&xdrs, msg)) {
 		xdr_destroy(&xdrs);
@@ -133,7 +133,7 @@ xdr2msg(struct msg *msg, u_char *buf, uint32_t buflen)
 	XDR xdrs;
 	int ret = 0;
 
-	xdrmem_create(&xdrs, buf, buflen, XDR_DECODE);
+	xdrmem_create(&xdrs, (char*)buf, buflen, XDR_DECODE);
 
 	if (!xdr_msg(&xdrs, msg))
 		ret = -1;

@@ -545,7 +545,7 @@ conf_decode_base64 (u_int8_t *out, u_int32_t *len, u_char *buf)
 			if (c2 & 0xF)
 				return (0);
 
-			if (!strcmp (buf, "=="))
+			if (!strncmp ((char*)buf, "==", 2))
 				buf++;
 			else
 				return (0);
@@ -561,7 +561,7 @@ conf_decode_base64 (u_int8_t *out, u_int32_t *len, u_char *buf)
 				if (c3 & 3)
 					return (0);
 
-				if (strcmp (buf, "="))
+				if (strncmp ((char*)buf, "=", 1))
 					return (0);
 
 			}

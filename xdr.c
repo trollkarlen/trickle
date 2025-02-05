@@ -103,7 +103,7 @@ xdr_msg(XDR *xdrs, struct msg *msg)
 {
 	X(xdr_short(xdrs, &msg->status));
 	X(xdr_union(xdrs, (int *)&msg->type, (char *)&msg->data,
-	      xdr_msg_discrim, _xdr_void));
+	      xdr_msg_discrim, (xdrproc_t)_xdr_void));
 
 	return (TRUE);
 }

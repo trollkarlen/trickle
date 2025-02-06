@@ -1,3 +1,4 @@
+---
 language: c
 
 before_install:
@@ -5,4 +6,3 @@ before_install:
  - sudo apt-get install -qq libtool libevent-dev
 
 script: autoreconf -if && ./configure && make
-

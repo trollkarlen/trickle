@@ -1,0 +1,39 @@
+---
+name: ubuntu default build
+
+"on":
+  push:
+    branches:
+      - master
+      - devel
+  pull_request:
+
+jobs:
+  build:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: install packages
+        run: sudo apt install build-essential pkg-config libtool libtool-bin libevent-dev libtirpc-dev
+      - name: show versions
+        run: |
+          set -x
+          autoreconf --version
+          gcc --version
+          libtool --version
+      - name: bootstrap
+        run: autoreconf -if
+      - name: configure
+        run: ./configure
+      - name: make
+        run: make
+#      - name: make check
+#        run: make check
+#      - name: make distcheck
+#        run: make distcheck CXXFLAGS=-std=c++17

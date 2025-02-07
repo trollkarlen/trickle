@@ -157,7 +157,7 @@ AC_MSG_CHECKING(if underscores are needed for symbols)
 AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
-#
+
 int underscoreprobe(void) { return (31415); }
 
 int
@@ -198,29 +198,31 @@ main(int argc, char **argv)
     HAVEMETHOD=yes],[AC_MSG_RESULT(no)],[AC_MSG_RESULT(no)])
 
 if test "$HAVEMETHOD" = "no"; then
-    dnl ugly, ugly hack
-    LIBCGUESS=`echo /lib/libc.so.*`
-    USRLIBCGUESS=`echo /usr/lib/libc.so*`
-    LIBCGUESS64=`echo /lib64/libc.so.*`
-    USRLIBCGUESS64=`echo /usr/lib64/libc.so*`
+    dnl ugly, ugly hacki
 
-    if test "$USRLIBCGUESS" = "/usr/lib/libc.so.*"; then
+    LIBCGUESS=`echo /lib*/libc.so.*`
+    USRLIBCGUESS=`echo /usr/lib*/libc.so.*`
+    ULIBCGUESS=`echo /lib/*-linux-gnu/libc.so.*`
+    UUSRLIBCGUESS=`echo /usr/lib/*-linux-gnu/libc.so.*`
+
+    if test "$USRLIBCGUESS" = "/usr/lib*/libc.so.*"; then
        USRLIBCGUESS=""
     fi
 
-    if test "$LIBCGUESS" = "/lib/libc.so.*"; then
+    if test "$LIBCGUESS" = "/lib*/libc.so.*"; then
        LIBCGUESS=""
     fi
 
-    if test "$USRLIBCGUESS64" = "/usr/lib64/libc.so.*"; then
-       USRLIBCGUESS64=""
+    if test "$UUSRLIBCGUESS" = "/usr/lib/*-linux-gnu/libc.so.*"; then
+       UUSRLIBCGUESS=""
     fi
 
-    if test "$LIBCGUESS64" = "/lib64/libc.so.*"; then
-       LIBCGUESS64=""
+    if test "$ULIBCGUESS" = "/lib/*-linux-gnu/libc.so.*"; then
+       ULIBCGUESS=""
     fi
 
-    for TESTLIB in libc.so `echo $USRLIBCGUESS` `echo $LIBCGUESS` `echo $USRLIBCGUESS64` `echo $LIBCGUESS64`
+
+    for TESTLIB in $LD_CONF_DIR libc.so $USRLIBCGUESS $LIBCGUESS $ULIBCGUESS $UUSRLIBCGUESS
     do
         AC_MSG_CHECKING(if we can access libc with $TESTLIB)
         AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <dlfcn.h>

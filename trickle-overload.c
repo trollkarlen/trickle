@@ -160,11 +160,15 @@ static void updatesd(struct sockdesc *, ssize_t, short);
 static void trickle_init(void);
 void safe_printv(int, const char *, ...);
 
+/* disable: warning: ISO C does not permit named variadic macros */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvariadic-macros"
 #define errx(l, fmt, arg...)                                                   \
   do {                                                                         \
     safe_printv(0, fmt, ##arg);                                                \
     exit(l);                                                                   \
   } while (0)
+#pragma GCC diagnostic pop
 
 #ifdef DL_NEED_UNDERSCORE
 #define UNDERSCORE "_"
@@ -256,8 +260,13 @@ static void trickle_init(void) {
   /*
    * We get write first, so that we have a bigger chance of
    * exiting gracefully with safe_printv.
+   *
    */
 
+/* disable: warning: ISO C forbids assignment between
+ * function pointer and _void*_ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
   GETADDR(write);
 
   GETADDR(socket);
@@ -294,6 +303,7 @@ static void trickle_init(void) {
   /* 		errx(1, "[trickle] Failed to open libpthread"); */
 
   GETADDR(poll);
+#pragma GCC diagnostic pop
 
   if ((winszstr = getenv("TRICKLE_WINDOW_SIZE")) == NULL)
     errx(1, "[trickle] Failed to get window size");
@@ -812,6 +822,9 @@ ssize_t recv(int sock, void *buf, size_t len, int flags) {
 }
 #endif /* !__FreeBSD__ */
 
+/* disable: warning: function types not truly compatible in ISO C */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #ifdef __sun__
 ssize_t recvfrom(int sock, void *buf, size_t len, int flags,
                  struct sockaddr *from, Psocklen_t fromlen)
@@ -851,6 +864,7 @@ ssize_t recvfrom(int sock, void *buf, size_t len, int flags,
 
   return (ret);
 }
+#pragma GCC diagnostic pop
 
 ssize_t write(int fd, const void *buf, size_t len) {
   ssize_t ret = -1;
@@ -953,6 +967,9 @@ ssize_t send(int sock, const void *buf, size_t len, int flags) {
 }
 #endif /* !__FreeBSD__ */
 
+/* disable: warning: function types not truly compatible in ISO C */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 ssize_t sendto(int sock, const void *buf, size_t len, int flags,
                const struct sockaddr *to, socklen_t tolen) {
   ssize_t ret = -1;
@@ -984,6 +1001,7 @@ ssize_t sendto(int sock, const void *buf, size_t len, int flags,
 
   return (ret);
 }
+#pragma GCC diagnostic pop
 
 #if 0
 int
@@ -1066,6 +1084,9 @@ int dup2(int oldfd, int newfd) {
   return (ret);
 }
 
+/* disable: warning: function types not truly compatible in ISO C */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #ifdef __sun__
 int accept(int sock, struct sockaddr *addr, Psocklen_t addrlen)
 #else
@@ -1105,6 +1126,7 @@ int accept(int sock, struct sockaddr *addr, socklen_t *addrlen)
 
   return (ret);
 }
+#pragma GCC diagnostic pop
 
 #ifdef HAVE_SENDFILE
 ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count) {

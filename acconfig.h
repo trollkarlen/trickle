@@ -19,8 +19,7 @@
 
 /* Prototypes for missing functions */
 #ifndef HAVE_STRLCAT
-    size_t
-    strlcat(char *, const char *, size_t);
+size_t strlcat(char *, const char *, size_t);
 #endif
 
 #ifndef HAVE_STRLCPY

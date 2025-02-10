@@ -173,7 +173,7 @@ static int conf_set_now(char *section, char *tag, char *value, int override,
 
   node = calloc(1, sizeof *node);
   if (!node) {
-    warn("conf_set: calloc (1, %d) failed", sizeof *node);
+    warn("conf_set: calloc (1, %zu) failed", sizeof *node);
     return (1);
   }
   node->section = strdup(section);
@@ -573,7 +573,7 @@ static struct conf_trans *conf_trans_node(int transaction, enum conf_op op) {
 
   node = calloc(1, sizeof *node);
   if (!node) {
-    warn("conf_trans_node: calloc (1, %d) failed", sizeof *node);
+    warn("conf_trans_node: calloc (1, %zu) failed", (long)sizeof *node);
     return (0);
   }
   node->trans = transaction;

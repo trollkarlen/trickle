@@ -56,8 +56,8 @@ static int clicmp(struct client *a, struct client *b) {
 }
 
 SPLAY_HEAD(clitree, client) clients;
-SPLAY_PROTOTYPE(clitree, client, next, clicmp);
-SPLAY_GENERATE(clitree, client, next, clicmp);
+SPLAY_PROTOTYPE(clitree, client, next, clicmp)
+SPLAY_GENERATE(clitree, client, next, clicmp)
 
 static void client_delaycb(int, short, void *);
 

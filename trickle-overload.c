@@ -203,8 +203,9 @@ static pthread_mutex_t global_lock = PTHREAD_MUTEX_INITIALIZER;
  * are normally reentrant from signal handlers, we need to block all signals
  * while we hold mutex or else we can deadlock.
  */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 static void trickle_lock(sigset_t *oset) {
-#ifdef NODLOPEN
   sigset_t mask;
   sigfillset(&mask);
   /*
@@ -223,9 +224,9 @@ static void trickle_lock(sigset_t *oset) {
     GETADDR(pthread_sigmask);
   }
   (*libc_pthread_sigmask)(SIG_SETMASK, &mask, oset);
-#endif
   pthread_mutex_lock(&global_lock);
 }
+#pragma GCC diagnostic pop
 
 static void trickle_unlock(sigset_t *oset) {
   pthread_mutex_unlock(&global_lock);

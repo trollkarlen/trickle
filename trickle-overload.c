@@ -1220,6 +1220,8 @@ static void update(int sock, ssize_t len, short which) {
   updatesd(sd, len, which);
 }
 
+static int print_cnt_i = 0;
+
 static void updatesd(struct sockdesc *sd, ssize_t len, short which) {
   struct bwstat_data *bsd;
   int ret;
@@ -1244,7 +1246,14 @@ static void updatesd(struct sockdesc *sd, ssize_t len, short which) {
 
   bsd = &sd->stat->data[which];
 
-  safe_printv(1, "[trickle] avg: %d.%d KB/s; win: %d.%d KB/s",
+  if (verbose == 1 && (print_cnt_i % 10000) == 0) {
+    print_cnt_i = 0;
+    safe_printv(1, "[trickle] avg: %d.%d KB/s; win: %d.%d KB/s",
+                (bsd->rate / 1024), ((bsd->rate % 1024) * 100 / 1024),
+                (bsd->winrate / 1024), ((bsd->winrate % 1024) * 100 / 1024));
+  }
+  print_cnt_i++;
+  safe_printv(2, "[trickle] avg: %d.%d KB/s; win: %d.%d KB/s",
               (bsd->rate / 1024), ((bsd->rate % 1024) * 100 / 1024),
               (bsd->winrate / 1024), ((bsd->winrate % 1024) * 100 / 1024));
 }

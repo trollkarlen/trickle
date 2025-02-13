@@ -112,11 +112,20 @@ int main(int argc, char **argv) {
   }
 
   if (!standalone) {
+#if BUILD_TRICKLED == 1
     if (sockname[0] == '\0')
       strlcpy(sockname, "/tmp/.trickled.sock", sizeof(sockname));
 
     if (stat(sockname, &sb) == -1 && (errno == EACCES || errno == ENOENT))
       warn("Could not reach trickled, working independently");
+#else
+#if HAVE_TIRPC == 1
+    errx(23,
+         "trickled disabled during build time, only standalone mode avalible");
+#else
+    errx(23, "Works only in standalone mode without tirpc");
+#endif
+#endif
   } else
     strlcpy(sockname, "", sizeof(sockname));
 

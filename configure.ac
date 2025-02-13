@@ -149,8 +149,33 @@ then
 AC_SUBST(EVENTINC)
 AC_SUBST(EVENTLIB)
 
+trickled="yes"
+AC_ARG_ENABLE([trickled],
+    [AS_HELP_STRING([--disable-trickled],[disable the building of trickled and tricklectl (default enabled)])],
+    [trickled=$enableval]
+    )
+AM_CONDITIONAL([BUILD_TRICKLED], [test x$trickled = xyes])
+
 dnl Checks for libtirpc needs pkg-config
-PKG_CHECK_MODULES([TIRPC], [libtirpc], [], [AC_MSG_ERROR([libtirpc devel package not found])])
+PKG_CHECK_MODULES([TIRPC], [libtirpc], [
+    HAVE_TIRPC=1
+    AC_DEFINE(HAVE_TIRPC, 1, [Define if your system has libtirpc])], [
+    HAVE_TIRPC=0
+    AC_DEFINE(HAVE_TIRPC, 0, [Define if your system does not have libtirpc ])])
+
+dnl PKG_CHECK_MODULES([TIRPC], [libtirpc], [AC_DEFINE(HAVE_TIRPC, 1, [Define if your system has the libtirpc]], [AC_MSG_ERROR([libtirpc devel package not found])])
+
+AM_CONDITIONAL([HAVE_TIRPC], [test "x$HAVE_TIRPC" = "x1" ])
+
+AC_MSG_CHECKING(if trickled should be built)
+AC_MSG_RESULT($trickled)
+
+AS_IF([test x$trickled = xyes], [
+    AS_IF([test x$HAVE_TIRPC = x0], [
+          AC_MSG_ERROR([libtirpc devel package not found and trickled cant be built])
+        ], [])
+    ],
+    [])
 
 dnl check if underscores are needed
 AC_MSG_CHECKING(if underscores are needed for symbols)

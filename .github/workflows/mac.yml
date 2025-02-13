@@ -25,8 +25,8 @@ jobs:
       - name: bootstrap
         run: autoreconf -if
       - name: configure
-        run: ./configure --with-libevent=$(brew --prefix libevent)
-        # CXXFLAGS="-std=c++17 -I$(brew --prefix nettle)/include -L$(brew --prefix nettle)/lib"
+        # libtipc does not build or exixt for mac
+        run: ./configure --with-libevent=$(brew --prefix libevent) --disable-trickled
       - name: make
         run: make
       # tests fail because readlink does not understand -f on mac
